@@ -125,6 +125,70 @@
       .tile, .desc { transition: none; }
       .tile:hover { transform: none; }
     }
+
+    /* ---- Local Chat AI dialog (native <dialog>: Esc, focus trap, backdrop built in) ---- */
+    .lc-dialog {
+      --c: var(--amber);
+      width: min(560px, calc(100vw - 32px));
+      padding: 0;
+      color: var(--text);
+      background: var(--card);
+      border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line));
+      border-radius: 14px;
+      box-shadow: 0 24px 60px rgb(0 0 0 / 0.35);
+    }
+    .lc-dialog::backdrop { background: rgb(8 12 18 / 0.55); backdrop-filter: blur(3px); }
+    .lc-dialog[open] { animation: lc-in 0.18s ease-out; }
+    @keyframes lc-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+
+    .lc-head { display: flex; align-items: flex-start; gap: 14px; padding: 22px 22px 0; }
+    .lc-badge {
+      flex: none; display: grid; place-items: center; width: 44px; height: 44px;
+      font-weight: 700; color: var(--c);
+      background: color-mix(in srgb, var(--c) 12%, var(--card));
+      border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line));
+      border-radius: 10px;
+    }
+    .lc-head h2 { margin: 0; font-size: 1.15rem; letter-spacing: -0.01em; }
+    .lc-head p { margin: 2px 0 0; font-size: 0.9rem; color: var(--muted); }
+    .lc-close {
+      flex: none; margin: -4px -4px 0 auto; width: 34px; height: 34px;
+      display: grid; place-items: center; font-size: 1.3rem; line-height: 1;
+      color: var(--muted); background: transparent; border: 0; border-radius: 8px; cursor: pointer;
+    }
+    .lc-close:hover { color: var(--text); background: color-mix(in srgb, var(--muted) 14%, transparent); }
+
+    .lc-body { padding: 18px 22px 22px; }
+    .lc-steps { margin: 0 0 16px; padding-left: 1.2rem; font-size: 0.92rem; color: var(--muted); }
+    .lc-steps li { margin-bottom: 4px; padding-left: 4px; }
+    .lc-steps li::marker { font-weight: 700; color: var(--c); }
+    .lc-steps b { color: var(--text); font-weight: 600; }
+
+    .lc-cmd { display: flex; align-items: stretch; background: #0d1117; border: 1px solid #2a3340; border-radius: 10px; overflow: hidden; }
+    .lc-cmd code {
+      flex: 1; min-width: 0; padding: 14px 16px;
+      font: 0.8rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #b8f28b; overflow-x: auto; white-space: nowrap; user-select: all;
+    }
+    .lc-cmd code::before { content: "$ "; color: #6b7686; user-select: none; }
+    .lc-copy {
+      flex: none; min-width: 84px; padding: 0 16px;
+      font: 600 0.82rem system-ui, sans-serif;
+      color: #e6edf3; background: #1b2330; border: 0; border-left: 1px solid #2a3340; cursor: pointer;
+    }
+    .lc-copy:hover { background: #243044; }
+    .lc-copy[data-state="done"] { color: #b8f28b; }
+
+    .lc-foot { margin: 14px 0 0; font-size: 0.82rem; color: var(--muted); }
+    .lc-foot a { color: inherit; text-underline-offset: 3px; }
+    .lc-foot a:hover { color: var(--text); }
+
+    .lc-close:focus-visible, .lc-copy:focus-visible { outline: 2px solid var(--c); outline-offset: -2px; }
+    @media (prefers-reduced-motion: reduce) { .lc-dialog[open] { animation: none; } }
+    @media (max-width: 480px) {
+      .lc-cmd { flex-direction: column; }
+      .lc-copy { min-height: 42px; border-left: 0; border-top: 1px solid #2a3340; }
+    }
   </style>
 </head>
 <body>
@@ -137,8 +201,6 @@
       <li class="cat-text"><i></i>Text</li>
       <li class="cat-dev"><i></i>Developer</li>
       <li class="cat-math"><i></i>Math</li>
-      <!-- Add a legend item when you use a new category:
-      <li class="cat-dev"><i></i>Developer</li> -->
     </ul>
 
     <main class="grid">
@@ -178,6 +240,12 @@
         <span class="desc">Understand Linux processes.</span>
       </a>
 
+      <a class="tile cat-dev" href="#" id="local-chat-ai-link">
+        <span class="num"></span>
+        <span class="sym">AI</span>
+        <span class="name">Local Chat AI</span>
+        <span class="desc">Chat with local AI models using Ollama.</span>
+      </a>
 
       <a class="tile cat-math" href="graph-lab.html">
         <span class="num"></span>
@@ -213,5 +281,78 @@
       <a href="https://github.com/hclpandv/web-tools">Source on GitHub</a>
     </footer>
   </div>
+
+  <!-- Local Chat AI install dialog -->
+  <dialog id="local-chat-ai-popup" class="lc-dialog" aria-labelledby="lc-title">
+    <div class="lc-head">
+      <span class="lc-badge" aria-hidden="true">AI</span>
+      <div>
+        <h2 id="lc-title">Install Local Chat AI</h2>
+        <p>Chat with local models through Ollama.</p>
+      </div>
+      <button class="lc-close" id="local-chat-ai-close" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="lc-body">
+      <ol class="lc-steps">
+        <li>Open <b>Terminal</b> on your Mac or Linux machine.</li>
+        <li><b>Paste</b> the command below and press Enter.</li>
+      </ol>
+
+      <div class="lc-cmd">
+        <code id="local-chat-ai-command">curl -fsSL https://raw.githubusercontent.com/hclpandv/web-tools/main/docs/assets/install-local-chat-ai.sh | bash</code>
+        <button class="lc-copy" id="local-chat-ai-copy">Copy</button>
+      </div>
+
+      <p class="lc-foot">
+        Want to check it first?
+        <a href="https://raw.githubusercontent.com/hclpandv/web-tools/main/docs/assets/install-local-chat-ai.sh" target="_blank" rel="noopener">Read the script</a>
+      </p>
+    </div>
+  </dialog>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const link = document.getElementById('local-chat-ai-link');
+      const dialog = document.getElementById('local-chat-ai-popup');
+      const closeBtn = document.getElementById('local-chat-ai-close');
+      const copyBtn = document.getElementById('local-chat-ai-copy');
+      const cmdEl = document.getElementById('local-chat-ai-command');
+      let timer;
+
+      if (!link || !dialog) {
+        console.warn('Local Chat AI: tile link or dialog not found. Check the IDs.');
+        return;
+      }
+
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        dialog.showModal();
+      });
+
+      closeBtn?.addEventListener('click', () => dialog.close());
+
+      // Clicking the dimmed backdrop closes the dialog
+      dialog.addEventListener('click', e => {
+        if (e.target === dialog) dialog.close();
+      });
+
+      copyBtn?.addEventListener('click', async () => {
+        const command = cmdEl.textContent.trim();
+        try {
+          await navigator.clipboard.writeText(command);
+          copyBtn.textContent = 'Copied';
+          copyBtn.dataset.state = 'done';
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            copyBtn.textContent = 'Copy';
+            delete copyBtn.dataset.state;
+          }, 2000);
+        } catch {
+          window.prompt('Copy this command:', command);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
