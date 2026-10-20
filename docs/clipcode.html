@@ -94,7 +94,7 @@
   <span id="cnt"></span>
   <span id="eolst"></span>
   <span class="grow"></span>
-  <span id="saved" class="hide-sm">Each language autosaves in this browser. Ctrl+S downloads, F1 opens commands.</span>
+  <span id="saved" class="hide-sm">Each language autosaves in this browser. F1 opens commands.</span>
 </footer>
 
 <!-- Loaded before Monaco's AMD loader so they register as plain globals -->
@@ -316,7 +316,7 @@
       $('saved').textContent = 'Downloaded script' + ext() + '. Your text stays saved in this browser.';
     }
     $('btn-save').onclick = download;
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, download);
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function () {});
 
     function openFile(f) {
       if (!f) return;
