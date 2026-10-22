@@ -45,6 +45,8 @@
   #preview blockquote { margin: 1em 0; padding: 0 1em; border-left: 3px solid var(--ac); color: var(--muted); }
   #preview table { border-collapse: collapse; }
   #preview th, #preview td { border: 1px solid var(--line); padding: 5px 12px; }
+  #preview.html { padding: 0; overflow: hidden; }
+  #preview iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
   @media (max-width: 640px) { main { flex-direction: column; } #preview { border-left: 0; border-top: 1px solid var(--line); } }
   footer { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 5px 12px; border-top: 1px solid var(--line);
            font-size: 12px; color: var(--muted); }
@@ -251,20 +253,33 @@
       if (n.tagName === 'A' && n.getAttribute('href')) { n.setAttribute('target', '_blank'); n.setAttribute('rel', 'noopener noreferrer'); }
     });
     function renderPrev() {
-      var p = $('preview');
-      p.hidden = !(prevOn && $('mode').value === 'markdown');
+      var p = $('preview'), m = $('mode').value;
+      p.hidden = !(prevOn && (m === 'markdown' || m === 'html'));
       if (p.hidden) return;
+      p.classList.toggle('html', m === 'html');
+      if (m === 'html') {
+        // Sandboxed iframe: scripts run, but the page cannot touch Clipcode or its saved text
+        var f = p.firstElementChild;
+        if (!f || f.tagName !== 'IFRAME') {
+          p.textContent = '';
+          f = document.createElement('iframe');
+          f.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals allow-popups');
+          p.appendChild(f);
+        }
+        f.srcdoc = editor.getValue();
+        return;
+      }
       if (window.marked && window.DOMPurify) p.innerHTML = DOMPurify.sanitize(marked.parse(editor.getValue()));
       else p.textContent = 'The preview needs internet access to load the Markdown library.';
     }
     function syncPrevUi() {
       var b = $('btn-prev');
-      b.hidden = $('mode').value !== 'markdown';
+      b.hidden = ['markdown', 'html'].indexOf($('mode').value) < 0;
       b.setAttribute('aria-pressed', prevOn); b.classList.toggle('on', prevOn);
       renderPrev();
     }
     $('btn-prev').onclick = function () { prevOn = !prevOn; save('prev', prevOn ? '1' : '0'); syncPrevUi(); };
-    editor.onDidChangeModelContent(function () { clearTimeout(pt); pt = setTimeout(renderPrev, 150); });
+    editor.onDidChangeModelContent(function () { clearTimeout(pt); pt = setTimeout(renderPrev, $('mode').value === 'html' ? 500 : 150); });
 
     // Shell and Python files always start with a shebang (checked on download and when a file is opened).
     function ensureShebang() {
