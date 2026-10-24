@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Baryton C – øve og skrive</title>
+<style>
+:root{--bg:#f3f1ec;--surface:#fffdf8;--ink:#1d2a2e;--muted:#5f6d70;--line:#c9c4b8;--accent:#1f6f6b;--accent-ink:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#14191a;--surface:#1d2527;--ink:#ece8df;--muted:#9aa7a9;--line:#3a4547;--accent:#4fb3ad;--accent-ink:#0d1516}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,"Times New Roman",serif;display:flex;flex-direction:column}
+nav{display:flex;gap:6px;padding:10px 16px 0;padding-top:max(10px,env(safe-area-inset-top,0px));border-bottom:1px solid var(--line);background:var(--surface)}
+nav button{font:inherit;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:8px 14px;cursor:pointer}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+nav button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+iframe{flex:1;width:100%;border:0;background:var(--bg)}
+iframe[hidden]{display:none}
+</style>
+</head>
+<body>
+<nav role="tablist" aria-label="Velg verktøy">
+  <button role="tab" id="t0" aria-selected="true" aria-controls="f0">Øv på noter</button>
+  <button role="tab" id="t1" aria-selected="false" aria-controls="f1">Låteditor</button>
+</nav>
+<iframe id="f0" role="tabpanel" aria-labelledby="t0" title="Notetrener" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;no&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
+&lt;title&gt;Baryton C – notetrener&lt;/title&gt;
+&lt;style&gt;
+:root{
+  --bg:#f3f1ec; --surface:#fffdf8; --ink:#1d2a2e; --muted:#5f6d70; --line:#c9c4b8;
+  --accent:#1f6f6b; --accent-ink:#fff; --good:#2e7d32; --bad:#b3261e;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=&quot;light&quot;]){
+    --bg:#14191a; --surface:#1d2527; --ink:#ece8df; --muted:#9aa7a9; --line:#3a4547;
+    --accent:#4fb3ad; --accent-ink:#0d1516; --good:#7ccf80; --bad:#ff8a80;
+  }
+}
+:root[data-theme=&quot;dark&quot;]{
+  --bg:#14191a; --surface:#1d2527; --ink:#ece8df; --muted:#9aa7a9; --line:#3a4547;
+  --accent:#4fb3ad; --accent-ink:#0d1516; --good:#7ccf80; --bad:#ff8a80;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,&quot;Times New Roman&quot;,serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;margin:0 0 2px;font-weight:600}
+.sub{color:var(--muted);margin:0 0 16px;font-size:.95rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+#staff{width:100%;height:auto;display:block}
+.line{stroke:var(--ink);stroke-width:1.4}
+.ledger{stroke:var(--ink);stroke-width:1.6}
+.note{fill:var(--ink)}
+.note.good{fill:var(--good)} .note.bad{fill:var(--bad)}
+.stat{display:flex;gap:16px;justify-content:space-between;margin:12px 0;color:var(--muted);font-size:.95rem}
+.stat b{color:var(--ink)}
+#msg{min-height:1.6em;margin:6px 0 10px;font-weight:600}
+#msg.good{color:var(--good)} #msg.bad{color:var(--bad)}
+.keys{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+button,select{font:inherit;color:var(--ink)}
+.keys button{padding:16px 0;font-size:1.25rem;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.keys button:hover{border-color:var(--accent)}
+.keys button:active{background:var(--accent);color:var(--accent-ink)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+select{padding:6px 8px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.act{padding:8px 14px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;cursor:pointer;font-weight:600}
+.act.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.hint{color:var(--muted);font-size:.85rem;margin-top:14px}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main&gt;
+  &lt;h1&gt;Baryton C – notelesing&lt;/h1&gt;
+  &lt;p class=&quot;sub&quot;&gt;Bassnøkkel, klingende tone. Trykk riktig tonenavn.&lt;/p&gt;
+
+  &lt;div class=&quot;card&quot;&gt;&lt;svg id=&quot;staff&quot; viewBox=&quot;0 0 400 190&quot; role=&quot;img&quot; aria-label=&quot;Notelinjer med en note&quot;&gt;&lt;/svg&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;stat&quot;&gt;
+    &lt;span&gt;Riktige: &lt;b id=&quot;ok&quot;&gt;0&lt;/b&gt; / &lt;b id=&quot;tot&quot;&gt;0&lt;/b&gt;&lt;/span&gt;
+    &lt;span&gt;Rekke: &lt;b id=&quot;streak&quot;&gt;0&lt;/b&gt;&lt;/span&gt;
+    &lt;span&gt;Beste: &lt;b id=&quot;best&quot;&gt;0&lt;/b&gt;&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div id=&quot;msg&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;keys&quot; id=&quot;keys&quot;&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;row&quot;&gt;
+    &lt;label&gt;Omfang
+      &lt;select id=&quot;level&quot;&gt;
+        &lt;option value=&quot;0&quot;&gt;Linjer og mellomrom (G2–A3)&lt;/option&gt;
+        &lt;option value=&quot;1&quot; selected&gt;Vanlig baryton (E2–C4)&lt;/option&gt;
+        &lt;option value=&quot;2&quot;&gt;Utvidet (C2–G4)&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/label&gt;
+    &lt;label&gt;Navn
+      &lt;select id=&quot;names&quot;&gt;&lt;option value=&quot;en&quot;&gt;B&lt;/option&gt;&lt;option value=&quot;no&quot;&gt;H (norsk)&lt;/option&gt;&lt;/select&gt;
+    &lt;/label&gt;
+    &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;snd&quot; checked&gt; Lyd&lt;/label&gt;
+    &lt;button class=&quot;act alt&quot; id=&quot;play&quot;&gt;Spill tonen&lt;/button&gt;
+    &lt;button class=&quot;act alt&quot; id=&quot;skip&quot;&gt;Hopp over&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;p class=&quot;hint&quot;&gt;Tips: du kan også bruke tastene A–G på tastaturet.&lt;/p&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+(function(){
+  var L = [&quot;C&quot;,&quot;D&quot;,&quot;E&quot;,&quot;F&quot;,&quot;G&quot;,&quot;A&quot;,&quot;B&quot;], SEMI=[0,2,4,5,7,9,11];
+  var SP = 16, BOTTOM = 150, X0 = 20, X1 = 380; // line spacing, y of lowest line (G2)
+  var BASE = 18; // diatonic index of G2 (octave*7+letter)
+  var RANGES = [[18,26],[16,28],[14,32]]; // inclusive diatonic ranges
+  var svg = document.getElementById(&#x27;staff&#x27;), NS = &#x27;http://www.w3.org/2000/svg&#x27;;
+  var cur = null, answered = false, ok = 0, tot = 0, streak = 0, best = 0, audio = null;
+  var store = {get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},
+               set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  best = parseInt(store.get(&#x27;bar-best&#x27;)||&#x27;0&#x27;,10)||0;
+
+  function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e;}
+  function yOf(d){return BOTTOM-(d-BASE)*SP/2;}
+  function label(l){return (l===&quot;B&quot; &amp;&amp; $(&#x27;names&#x27;).value===&quot;no&quot;)?&quot;H&quot;:l;}
+  function $(i){return document.getElementById(i);}
+
+  function drawClef(){
+    // Simple bass clef: curl + body + two dots
+    el(&#x27;path&#x27;,{d:&#x27;M62 &#x27;+(BOTTOM-SP*2)+&#x27; c-4 -8 4 -14 12 -12 c12 3 14 20 -2 36 c-8 8 -16 14 -22 20&#x27;,
+      fill:&#x27;none&#x27;,stroke:&#x27;currentColor&#x27;,&#x27;stroke-width&#x27;:&#x27;3.4&#x27;,&#x27;stroke-linecap&#x27;:&#x27;round&#x27;,style:&#x27;color:var(--ink)&#x27;});
+    el(&#x27;circle&#x27;,{cx:60,cy:BOTTOM-SP*2-2,r:3.6,style:&#x27;fill:var(--ink)&#x27;});
+    el(&#x27;circle&#x27;,{cx:84,cy:BOTTOM-SP*3+4,r:2.4,style:&#x27;fill:var(--ink)&#x27;});
+    el(&#x27;circle&#x27;,{cx:84,cy:BOTTOM-SP*2-4,r:2.4,style:&#x27;fill:var(--ink)&#x27;});
+  }
+  function render(cls){
+    svg.innerHTML=&#x27;&#x27;;
+    for(var i=0;i&lt;5;i++) el(&#x27;line&#x27;,{x1:X0,x2:X1,y1:BOTTOM-i*SP,y2:BOTTOM-i*SP,class:&#x27;line&#x27;});
+    drawClef();
+    if(!cur) return;
+    var cx=230, y=yOf(cur.d);
+    for(var d=16; d&gt;=cur.d; d-=2) if(d&lt;BASE) el(&#x27;line&#x27;,{x1:cx-18,x2:cx+18,y1:yOf(d),y2:yOf(d),class:&#x27;ledger&#x27;});
+    for(var u=28; u&lt;=cur.d; u+=2) el(&#x27;line&#x27;,{x1:cx-18,x2:cx+18,y1:yOf(u),y2:yOf(u),class:&#x27;ledger&#x27;});
+    var n=el(&#x27;ellipse&#x27;,{cx:cx,cy:y,rx:11,ry:7.6,transform:&#x27;rotate(-18 &#x27;+cx+&#x27; &#x27;+y+&#x27;)&#x27;,class:&#x27;note &#x27;+(cls||&#x27;&#x27;)});
+    var up = cur.d &lt; 22;
+    el(&#x27;line&#x27;,{x1:up?cx+10:cx-10,x2:up?cx+10:cx-10,y1:y,y2:up?y-SP*3.2:y+SP*3.2,class:&#x27;line&#x27;});
+  }
+  function pitch(d){var o=Math.floor(d/7),l=d%7;return {o:o,l:l,midi:12*(o+1)+SEMI[l]};}
+  function tone(midi){
+    if(!$(&#x27;snd&#x27;).checked) return;
+    try{
+      audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+      var t=audio.currentTime, f=440*Math.pow(2,(midi-69)/12), end=t+.9;
+      var g=audio.createGain(), lp=audio.createBiquadFilter();
+      lp.type=&#x27;lowpass&#x27;; lp.Q.value=.7; lp.frequency.value=Math.min(f*3.2,2200);
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.24,t+.04);
+      g.gain.setValueAtTime(.24,end-.05); g.gain.linearRampToValueAtTime(0,end);
+      [[&#x27;sawtooth&#x27;,-4,.6],[&#x27;sawtooth&#x27;,4,.6],[&#x27;sine&#x27;,0,.8]].forEach(function(v){
+        var o=audio.createOscillator(), og=audio.createGain();
+        o.type=v[0]; o.frequency.value=f; o.detune.value=v[1]; og.gain.value=v[2];
+        o.connect(og); og.connect(v[0]===&#x27;sine&#x27;?g:lp); o.start(t); o.stop(end+.05);
+      });
+      lp.connect(g); g.connect(audio.destination);
+    }catch(e){}
+  }
+  function next(){
+    var r=RANGES[+$(&#x27;level&#x27;).value], d;
+    do { d=r[0]+Math.floor(Math.random()*(r[1]-r[0]+1)); } while(cur &amp;&amp; d===cur.d);
+    var p=pitch(d); cur={d:d,l:p.l,midi:p.midi};
+    answered=false; $(&#x27;msg&#x27;).textContent=&#x27;&#x27;; $(&#x27;msg&#x27;).className=&#x27;&#x27;; render();
+  }
+  function stats(){$(&#x27;ok&#x27;).textContent=ok;$(&#x27;tot&#x27;).textContent=tot;$(&#x27;streak&#x27;).textContent=streak;$(&#x27;best&#x27;).textContent=best;}
+  function answer(l){
+    if(answered) return;
+    answered=true; tot++;
+    var m=$(&#x27;msg&#x27;);
+    if(l===cur.l){
+      ok++; streak++; if(streak&gt;best){best=streak;store.set(&#x27;bar-best&#x27;,best);}
+      m.textContent=&#x27;Riktig – &#x27;+label(L[cur.l])+(Math.floor(cur.d/7)); m.className=&#x27;good&#x27;; render(&#x27;good&#x27;); tone(cur.midi);
+    } else {
+      streak=0; m.textContent=&#x27;Det var &#x27;+label(L[cur.l])+&#x27; (du valgte &#x27;+label(L[l])+&#x27;)&#x27;; m.className=&#x27;bad&#x27;; render(&#x27;bad&#x27;); tone(cur.midi);
+    }
+    stats(); setTimeout(next, 1100);
+  }
+  function buildKeys(){
+    var k=$(&#x27;keys&#x27;); k.innerHTML=&#x27;&#x27;;
+    L.forEach(function(n,i){
+      var b=document.createElement(&#x27;button&#x27;); b.textContent=label(n); b.setAttribute(&#x27;aria-label&#x27;,&#x27;Tone &#x27;+label(n));
+      b.addEventListener(&#x27;click&#x27;,function(){answer(i);}); k.appendChild(b);
+    });
+  }
+  document.addEventListener(&#x27;keydown&#x27;,function(e){
+    if(e.target.tagName===&#x27;SELECT&#x27;) return;
+    var i=L.indexOf(e.key.toUpperCase()); if(i&lt;0 &amp;&amp; e.key.toUpperCase()===&#x27;H&#x27;) i=6;
+    if(i&gt;=0) answer(i);
+  });
+  $(&#x27;level&#x27;).addEventListener(&#x27;change&#x27;,next);
+  $(&#x27;names&#x27;).addEventListener(&#x27;change&#x27;,function(){buildKeys();});
+  $(&#x27;play&#x27;).addEventListener(&#x27;click&#x27;,function(){tone(cur.midi);});
+  $(&#x27;skip&#x27;).addEventListener(&#x27;click&#x27;,next);
+  buildKeys(); stats(); next();
+})();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+<iframe id="f1" role="tabpanel" aria-labelledby="t1" title="Låteditor" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;no&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
+&lt;title&gt;Baryton C – låteditor&lt;/title&gt;
+&lt;style&gt;
+:root{
+  --bg:#f3f1ec; --surface:#fffdf8; --ink:#1d2a2e; --muted:#5f6d70; --line:#c9c4b8;
+  --accent:#1f6f6b; --accent-ink:#fff; --hl:#d9822b;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=&quot;light&quot;]){--bg:#14191a;--surface:#1d2527;--ink:#ece8df;--muted:#9aa7a9;--line:#3a4547;--accent:#4fb3ad;--accent-ink:#0d1516;--hl:#f0a24f}
+}
+:root[data-theme=&quot;dark&quot;]{--bg:#14191a;--surface:#1d2527;--ink:#ece8df;--muted:#9aa7a9;--line:#3a4547;--accent:#4fb3ad;--accent-ink:#0d1516;--hl:#f0a24f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,&quot;Times New Roman&quot;,serif}
+main{max-width:900px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;margin:0 0 2px;font-weight:600}
+.sub{color:var(--muted);margin:0 0 14px;font-size:.95rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+#wrap{overflow-x:auto;padding:8px}
+#staff{display:block;cursor:crosshair}
+.line{stroke:var(--ink);stroke-width:1.4}
+.ink{fill:var(--ink)} .hl{fill:var(--hl);stroke:var(--hl)}
+.sel{fill:var(--accent);stroke:var(--accent)}
+text{fill:var(--ink);font-family:Georgia,serif}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.grp{display:flex;gap:0}
+.grp button{border-radius:0;margin-left:-1px}
+.grp button:first-child{border-radius:8px 0 0 8px;margin-left:0}
+.grp button:last-child{border-radius:0 8px 8px 0}
+button,input,textarea,select{font:inherit;color:var(--ink)}
+select{padding:7px 8px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+button{padding:7px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+button[aria-pressed=&quot;true&quot;]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);position:relative}
+button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+label{display:flex;gap:8px;align-items:center;font-size:.95rem}
+textarea{width:100%;min-height:90px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px;font:13px monospace}
+.hint{color:var(--muted);font-size:.88rem;margin-top:12px}
+details{margin-top:14px}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main&gt;
+  &lt;h1&gt;Baryton C – låteditor&lt;/h1&gt;
+  &lt;p class=&quot;sub&quot;&gt;Skriv en melodi i bassnøkkel, og trykk Spill for å høre den i klingende tone.&lt;/p&gt;
+
+  &lt;div class=&quot;row&quot; style=&quot;margin:0 0 12px&quot;&gt;&lt;label&gt;Eksempler &lt;select id=&quot;samples&quot; aria-label=&quot;Velg et eksempel&quot;&gt;&lt;/select&gt;&lt;/label&gt;&lt;/div&gt;
+  &lt;div class=&quot;card&quot;&gt;&lt;div id=&quot;wrap&quot;&gt;&lt;svg id=&quot;staff&quot; height=&quot;200&quot;&gt;&lt;/svg&gt;&lt;/div&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;row&quot;&gt;
+    &lt;button class=&quot;go&quot; id=&quot;play&quot;&gt;Spill&lt;/button&gt;
+    &lt;label&gt;Tempo &lt;input type=&quot;range&quot; id=&quot;bpm&quot; min=&quot;40&quot; max=&quot;200&quot; value=&quot;90&quot;&gt; &lt;span id=&quot;bpmv&quot;&gt;90&lt;/span&gt;&lt;/label&gt;
+    &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;loop&quot;&gt; Gjenta&lt;/label&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;grp&quot; id=&quot;durs&quot; role=&quot;group&quot; aria-label=&quot;Tonelengde&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;grp&quot; id=&quot;accs&quot; role=&quot;group&quot; aria-label=&quot;Fortegn&quot;&gt;&lt;/div&gt;
+    &lt;button id=&quot;rest&quot;&gt;Legg til pause&lt;/button&gt;
+    &lt;button id=&quot;del&quot;&gt;Slett&lt;/button&gt;
+    &lt;button id=&quot;clear&quot;&gt;Tøm alt&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;p class=&quot;hint&quot;&gt;Klikk på notelinjene for å sette inn en note der du klikker. Klikk på en note for å velge den, og bruk ↑ ↓ for å endre tonehøyde, ← → for å flytte valget, Delete for å slette og mellomrom for å spille eller stoppe.&lt;/p&gt;
+
+  &lt;details&gt;
+    &lt;summary&gt;Lagre eller last inn som tekst&lt;/summary&gt;
+    &lt;div class=&quot;row&quot;&gt;&lt;button id=&quot;exp&quot;&gt;Eksporter&lt;/button&gt;&lt;button id=&quot;imp&quot;&gt;Importer&lt;/button&gt;&lt;/div&gt;
+    &lt;textarea id=&quot;json&quot; aria-label=&quot;Notedata&quot;&gt;&lt;/textarea&gt;
+  &lt;/details&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+(function(){
+  var NS=&#x27;http://www.w3.org/2000/svg&#x27;, svg=document.getElementById(&#x27;staff&#x27;);
+  var SP=16, BOTTOM=130, BASE=18, X0=10, CLEF_W=100;
+  var SEMI=[0,2,4,5,7,9,11], DURS=[[4,&#x27;Hel&#x27;],[2,&#x27;Halv&#x27;],[1,&#x27;Fjerdedel&#x27;],[.5,&#x27;Åttendedel&#x27;]];
+  var items=[], sel=-1, curDur=1, curAcc=0, hlIdx=-1, playing=null, audio=null;
+  function $(i){return document.getElementById(i);}
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e;}
+  function yOf(d){return BOTTOM-(d-BASE)*SP/2;}
+  function midi(it){var o=Math.floor(it.d/7);return 12*(o+1)+SEMI[it.d%7]+(it.acc||0);}
+
+  // Starter song: Frère Jacques
+  function demo(){
+    var s=[[21,1],[22,1],[23,1],[21,1],[21,1],[22,1],[23,1],[21,1],[23,1],[24,1],[25,2],[23,1],[24,1],[25,2],
+      [25,.5],[26,.5],[25,.5],[24,.5],[23,1],[21,1],[25,.5],[26,.5],[25,.5],[24,.5],[23,1],[21,1],[21,1],[18,1],[21,2],[21,1],[18,1],[21,2]];
+    return s.map(function(n){return {d:n[0],dur:n[1],acc:0,rest:false};});
+  }
+  // Eksempler: [navn, tempo, [[trinn, lengde], ...]]  (trinn 21 = C3)
+  var Q=function(ds){return ds.map(function(d){return [d,1];});};
+  var tw1=Q([21,21,25,25,26,26]).concat([[25,2]],Q([24,24,23,23,22,22]),[[21,2]]);
+  var tw2=Q([25,25,24,24,23,23]).concat([[22,2]]);
+  var SAMPLES=[
+    [&#x27;Broder Jakob&#x27;,90,demo().map(function(o){return [o.d,o.dur];})],
+    [&#x27;C-durskala opp og ned&#x27;,80,Q([21,22,23,24,25,26,27,28,28,27,26,25,24,23,22,21])],
+    [&#x27;Ode til gleden (forenklet)&#x27;,100,Q([23,23,24,25,25,24,23,22,21,21,22,23,23,22]).concat([[22,2]],Q([23,23,24,25,25,24,23,22,21,21,22,23,22,21]),[[21,2]])],
+    [&#x27;B\u00e6, b\u00e6, lille lam&#x27;,90,tw1.concat(tw2,tw2,tw1)],
+    [&#x27;Mary hadde et lite lam&#x27;,100,Q([23,22,21,22,23,23]).concat([[23,2]],Q([22,22]),[[22,2]],Q([23,25]),[[25,2]],Q([23,22,21,22,23,23,23,23,22,22,23,22]),[[21,4]])],
+    [&#x27;Jingle Bells (refreng, forenklet)&#x27;,120,Q([23,23]).concat([[23,2]],Q([23,23]),[[23,2]],Q([23,25,21,22]),[[23,4]],Q([24,24,24,24,24,23,23]),[[23,.5],[23,.5]],Q([23,22,22,23]),[[22,2],[25,2]])]
+  ];
+  var pick=$(&#x27;samples&#x27;);
+  pick.innerHTML=&#x27;&lt;option value=&quot;&quot;&gt;Velg \u2026&lt;/option&gt;&#x27;+SAMPLES.map(function(s,i){return &#x27;&lt;option value=&quot;&#x27;+i+&#x27;&quot;&gt;&#x27;+s[0]+&#x27;&lt;/option&gt;&#x27;;}).join(&#x27;&#x27;);
+  pick.addEventListener(&#x27;change&#x27;,function(){
+    var s=SAMPLES[this.value]; if(!s) return; if(playing) stop();
+    items=s[2].map(function(n){return {d:n[0],dur:n[1],acc:0,rest:false};});
+    $(&#x27;bpm&#x27;).value=s[1]; $(&#x27;bpmv&#x27;).textContent=s[1];
+    sel=-1; hlIdx=-1; this.value=&#x27;&#x27;; $(&#x27;wrap&#x27;).scrollLeft=0; change();
+  });
+
+  function layout(){
+    var x=X0+CLEF_W, acc=0, bar=1, out=[], bars=[];
+    items.forEach(function(it,i){
+      var w=30+it.dur*16;
+      out.push({x:x+w/2,start:acc,end:acc+it.dur});
+      x+=w; acc+=it.dur;
+      if(acc&gt;=bar*4-1e-9){bars.push(x+4);x+=12;bar++;}
+    });
+    return {pos:out,bars:bars,width:Math.max(x+60,$(&#x27;wrap&#x27;).clientWidth-16)};
+  }
+  var L=layout();
+  function render(){
+    L=layout(); svg.innerHTML=&#x27;&#x27;; svg.setAttribute(&#x27;width&#x27;,L.width);
+    for(var i=0;i&lt;5;i++) el(&#x27;line&#x27;,{x1:X0,x2:L.width-10,y1:BOTTOM-i*SP,y2:BOTTOM-i*SP,class:&#x27;line&#x27;});
+    el(&#x27;line&#x27;,{x1:X0,x2:X0,y1:BOTTOM,y2:BOTTOM-4*SP,class:&#x27;line&#x27;});
+    el(&#x27;path&#x27;,{d:&#x27;M32 &#x27;+(BOTTOM-2*SP)+&#x27; c-4 -8 4 -14 12 -12 c12 3 14 20 -2 36 c-8 8 -16 14 -22 20&#x27;,fill:&#x27;none&#x27;,stroke:&#x27;var(--ink)&#x27;,&#x27;stroke-width&#x27;:3.4,&#x27;stroke-linecap&#x27;:&#x27;round&#x27;});
+    el(&#x27;circle&#x27;,{cx:30,cy:BOTTOM-2*SP-2,r:3.6,class:&#x27;ink&#x27;});
+    el(&#x27;circle&#x27;,{cx:54,cy:BOTTOM-3*SP+4,r:2.4,class:&#x27;ink&#x27;});
+    el(&#x27;circle&#x27;,{cx:54,cy:BOTTOM-2*SP-4,r:2.4,class:&#x27;ink&#x27;});
+    [[&#x27;4&#x27;,BOTTOM-3*SP+2],[&#x27;4&#x27;,BOTTOM-SP+2]].forEach(function(t){var e=el(&#x27;text&#x27;,{x:70,y:t[1]+8,&#x27;font-size&#x27;:26,&#x27;font-weight&#x27;:700});e.textContent=t[0];});
+    L.bars.forEach(function(bx){el(&#x27;line&#x27;,{x1:bx,x2:bx,y1:BOTTOM,y2:BOTTOM-4*SP,class:&#x27;line&#x27;});});
+    items.forEach(function(it,i){drawItem(it,L.pos[i].x,i===hlIdx?&#x27;hl&#x27;:(i===sel?&#x27;sel&#x27;:&#x27;ink&#x27;));});
+  }
+  function drawItem(it,cx,cls){
+    var col=cls===&#x27;ink&#x27;?&#x27;var(--ink)&#x27;:(cls===&#x27;hl&#x27;?&#x27;var(--hl)&#x27;:&#x27;var(--accent)&#x27;);
+    if(it.rest){
+      var y=BOTTOM-2*SP;
+      if(it.dur&gt;=2) el(&#x27;rect&#x27;,{x:cx-8,y:it.dur===4?y:y-5,width:16,height:5,class:cls});
+      else el(&#x27;path&#x27;,{d:&#x27;M&#x27;+(cx-3)+&#x27; &#x27;+(y-14)+&#x27; l8 8 l-8 8 l8 8&#x27;,fill:&#x27;none&#x27;,stroke:col,&#x27;stroke-width&#x27;:it.dur===1?3:2});
+      return;
+    }
+    var y=yOf(it.d);
+    for(var d=16;d&gt;=it.d;d-=2) el(&#x27;line&#x27;,{x1:cx-16,x2:cx+16,y1:yOf(d),y2:yOf(d),class:&#x27;line&#x27;});
+    for(var u=28;u&lt;=it.d;u+=2) el(&#x27;line&#x27;,{x1:cx-16,x2:cx+16,y1:yOf(u),y2:yOf(u),class:&#x27;line&#x27;});
+    if(it.acc){var t=el(&#x27;text&#x27;,{x:cx-27,y:y+6,&#x27;font-size&#x27;:20,style:&#x27;fill:&#x27;+col});t.textContent=it.acc&gt;0?&#x27;\u266F&#x27;:&#x27;\u266D&#x27;;}
+    var open=it.dur&gt;=2;
+    el(&#x27;ellipse&#x27;,{cx:cx,cy:y,rx:10.5,ry:7.4,transform:&#x27;rotate(-18 &#x27;+cx+&#x27; &#x27;+y+&#x27;)&#x27;,
+      fill:open?&#x27;none&#x27;:col,stroke:col,&#x27;stroke-width&#x27;:2});
+    if(it.dur&lt;4){
+      var up=it.d&lt;22, sx=up?cx+9.5:cx-9.5, ey=up?y-SP*3.3:y+SP*3.3;
+      el(&#x27;line&#x27;,{x1:sx,x2:sx,y1:y,y2:ey,stroke:col,&#x27;stroke-width&#x27;:1.6});
+      if(it.dur===.5) el(&#x27;path&#x27;,{d:up?&#x27;M&#x27;+sx+&#x27; &#x27;+ey+&#x27; q10 8 6 20&#x27;:&#x27;M&#x27;+sx+&#x27; &#x27;+ey+&#x27; q-10 -8 -6 -20&#x27;,fill:&#x27;none&#x27;,stroke:col,&#x27;stroke-width&#x27;:2});
+    }
+  }
+  function tone(m,t,len){
+    audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+    // Steady baritone voice: two saws + sine body, fixed warm filter, no sweep, no vibrato
+    var t0=t==null?audio.currentTime:t, f=440*Math.pow(2,(m-69)/12), end=t0+len;
+    var g=audio.createGain(), lp=audio.createBiquadFilter(), oscs=[];
+    lp.type=&#x27;lowpass&#x27;; lp.Q.value=.7; lp.frequency.value=Math.min(f*3.2,2200);
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(.24,t0+.04);
+    g.gain.setValueAtTime(.24,Math.max(t0+.04,end-.05));
+    g.gain.linearRampToValueAtTime(0,end);
+    [[&#x27;sawtooth&#x27;,-4,.6],[&#x27;sawtooth&#x27;,4,.6],[&#x27;sine&#x27;,0,.8]].forEach(function(s){
+      var o=audio.createOscillator(), og=audio.createGain();
+      o.type=s[0]; o.frequency.value=f; o.detune.value=s[1]; og.gain.value=s[2];
+      o.connect(og); og.connect(s[0]===&#x27;sine&#x27;?g:lp);
+      o.start(t0); o.stop(end+.05); oscs.push(o);
+    });
+    lp.connect(g); g.connect(audio.destination);
+    return {stop:function(){oscs.forEach(function(o){o.stop();});}};
+  }
+  function preview(it){try{if(!it.rest)tone(midi(it),null,.5);}catch(e){}}
+  function stop(){
+    if(!playing) return;
+    playing.osc.forEach(function(o){try{o.stop();}catch(e){}});
+    cancelAnimationFrame(playing.raf); playing=null; hlIdx=-1; $(&#x27;play&#x27;).textContent=&#x27;Spill&#x27;; render();
+  }
+  function play(){
+    if(playing){stop();return;} if(!items.length) return;
+    try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();if(audio.resume)audio.resume();}catch(e){return;}
+    var spb=60/+$(&#x27;bpm&#x27;).value, t0=audio.currentTime+.15, osc=[], total=0;
+    items.forEach(function(it,i){
+      if(!it.rest) osc.push(tone(midi(it),t0+L.pos[i].start*spb,it.dur*spb*.95));
+      total=L.pos[i].end;
+    });
+    playing={osc:osc,raf:0}; $(&#x27;play&#x27;).textContent=&#x27;Stopp&#x27;;
+    (function tick(){
+      var b=(audio.currentTime-t0)/spb, idx=-1;
+      for(var i=0;i&lt;items.length;i++) if(b&gt;=L.pos[i].start&amp;&amp;b&lt;L.pos[i].end){idx=i;break;}
+      if(idx!==hlIdx){hlIdx=idx;render();if(idx&gt;=0){var w=$(&#x27;wrap&#x27;),x=L.pos[idx].x;if(x&gt;w.scrollLeft+w.clientWidth-80||x&lt;w.scrollLeft)w.scrollLeft=x-80;}}
+      if(b&gt;=total){
+        if($(&#x27;loop&#x27;).checked){stop();play();return;}
+        stop();return;
+      }
+      playing.raf=requestAnimationFrame(tick);
+    })();
+  }
+  function save(){try{localStorage.setItem(&#x27;bar-song&#x27;,JSON.stringify({bpm:+$(&#x27;bpm&#x27;).value,items:items}));}catch(e){}}
+  function change(){render();save();}
+  function select(i){sel=i;syncBtns();render();}
+  function syncBtns(){
+    Array.prototype.forEach.call($(&#x27;durs&#x27;).children,function(b,i){b.setAttribute(&#x27;aria-pressed&#x27;,String(DURS[i][0]===curDur));});
+    Array.prototype.forEach.call($(&#x27;accs&#x27;).children,function(b,i){b.setAttribute(&#x27;aria-pressed&#x27;,String([0,1,-1][i]===curAcc));});
+  }
+  // Controls
+  DURS.forEach(function(d){var b=document.createElement(&#x27;button&#x27;);b.textContent=d[1];
+    b.addEventListener(&#x27;click&#x27;,function(){curDur=d[0];if(sel&gt;=0)items[sel].dur=d[0];syncBtns();change();});$(&#x27;durs&#x27;).appendChild(b);});
+  [[&#x27;\u266E&#x27;,0,&#x27;Oppløsningstegn&#x27;],[&#x27;\u266F&#x27;,1,&#x27;Kryss&#x27;],[&#x27;\u266D&#x27;,-1,&#x27;B-fortegn&#x27;]].forEach(function(a){var b=document.createElement(&#x27;button&#x27;);
+    b.textContent=a[0];b.setAttribute(&#x27;aria-label&#x27;,a[2]);
+    b.addEventListener(&#x27;click&#x27;,function(){curAcc=a[1];if(sel&gt;=0&amp;&amp;!items[sel].rest){items[sel].acc=a[1];preview(items[sel]);}syncBtns();change();});$(&#x27;accs&#x27;).appendChild(b);});
+  $(&#x27;play&#x27;).addEventListener(&#x27;click&#x27;,play);
+  $(&#x27;bpm&#x27;).addEventListener(&#x27;input&#x27;,function(){$(&#x27;bpmv&#x27;).textContent=this.value;if(playing)stop();save();});
+  $(&#x27;rest&#x27;).addEventListener(&#x27;click&#x27;,function(){items.splice(sel+1,0,{d:22,dur:curDur,acc:0,rest:true});sel++;change();});
+  $(&#x27;del&#x27;).addEventListener(&#x27;click&#x27;,function(){if(sel&gt;=0){items.splice(sel,1);sel=Math.min(sel,items.length-1);change();}});
+  $(&#x27;clear&#x27;).addEventListener(&#x27;click&#x27;,function(){if(playing)stop();items=[];sel=-1;change();});
+  $(&#x27;exp&#x27;).addEventListener(&#x27;click&#x27;,function(){$(&#x27;json&#x27;).value=JSON.stringify({bpm:+$(&#x27;bpm&#x27;).value,items:items});});
+  $(&#x27;imp&#x27;).addEventListener(&#x27;click&#x27;,function(){
+    try{var s=JSON.parse($(&#x27;json&#x27;).value);if(!Array.isArray(s.items))throw 0;
+      items=s.items.map(function(n){return {d:+n.d,dur:+n.dur,acc:+n.acc||0,rest:!!n.rest};});
+      if(s.bpm){$(&#x27;bpm&#x27;).value=s.bpm;$(&#x27;bpmv&#x27;).textContent=s.bpm;} sel=-1;change();
+    }catch(e){$(&#x27;json&#x27;).value=&#x27;Kunne ikke lese teksten. Lim inn data fra Eksporter.&#x27;;}
+  });
+  svg.addEventListener(&#x27;click&#x27;,function(e){
+    if(playing) stop();
+    var r=svg.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+    for(var i=0;i&lt;items.length;i++) if(Math.abs(L.pos[i].x-x)&lt;16){select(i);preview(items[i]);return;}
+    var d=Math.max(10,Math.min(34,BASE+Math.round((BOTTOM-y)/(SP/2))));
+    var idx=0; while(idx&lt;items.length&amp;&amp;L.pos[idx].x&lt;x) idx++;
+    var it={d:d,dur:curDur,acc:curAcc,rest:false};
+    items.splice(idx,0,it); sel=idx; preview(it); change();
+  });
+  document.addEventListener(&#x27;keydown&#x27;,function(e){
+    var t=e.target.tagName; if(t===&#x27;TEXTAREA&#x27;||t===&#x27;INPUT&#x27;&amp;&amp;e.target.type===&#x27;text&#x27;) return;
+    if(e.key===&#x27; &#x27;&amp;&amp;t!==&#x27;BUTTON&#x27;){e.preventDefault();play();return;}
+    if(sel&lt;0) return; var it=items[sel];
+    if(e.key===&#x27;ArrowUp&#x27;||e.key===&#x27;ArrowDown&#x27;){e.preventDefault();if(!it.rest){it.d=Math.max(10,Math.min(34,it.d+(e.key===&#x27;ArrowUp&#x27;?1:-1)));preview(it);change();}}
+    else if(e.key===&#x27;ArrowLeft&#x27;){e.preventDefault();select(Math.max(0,sel-1));}
+    else if(e.key===&#x27;ArrowRight&#x27;){e.preventDefault();select(Math.min(items.length-1,sel+1));}
+    else if(e.key===&#x27;Delete&#x27;||e.key===&#x27;Backspace&#x27;){e.preventDefault();$(&#x27;del&#x27;).click();}
+  });
+  window.addEventListener(&#x27;resize&#x27;,render);
+
+  // Load saved song or demo
+  items=demo();
+  try{var saved=JSON.parse(localStorage.getItem(&#x27;bar-song&#x27;)||&#x27;null&#x27;);
+    if(saved&amp;&amp;Array.isArray(saved.items)&amp;&amp;saved.items.length){items=saved.items;if(saved.bpm){$(&#x27;bpm&#x27;).value=saved.bpm;$(&#x27;bpmv&#x27;).textContent=saved.bpm;}}}catch(e){}
+  syncBtns(); render();
+})();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+" hidden></iframe>
+<script>
+(function(){
+  var tabs=[document.getElementById('t0'),document.getElementById('t1')],
+      frames=[document.getElementById('f0'),document.getElementById('f1')];
+  function show(n){
+    try{
+      var d=frames[1].contentDocument, p=d&&d.getElementById('play');
+      if(n===0&&p&&p.textContent==='Stopp') p.click();
+    }catch(e){}
+    tabs.forEach(function(t,i){t.setAttribute('aria-selected',String(i===n));frames[i].hidden=(i!==n);});
+    try{frames[n].contentWindow.focus();}catch(e){}
+  }
+  tabs.forEach(function(t,i){t.addEventListener('click',function(){show(i);});});
+  document.querySelector('nav').addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'){show(1);tabs[1].focus();}
+    if(e.key==='ArrowLeft'){show(0);tabs[0].focus();}
+  });
+})();
+</script>
+</body>
+</html>
